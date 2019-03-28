@@ -353,7 +353,7 @@ _ensure_uaa_cli_installed() {
 
 _ensure_tomcat_installed() {
     local version=$(grep "^tomcat=" ${repo_root}/.versions | cut -d= -f2)
-    local url="http://www-eu.apache.org/dist/tomcat/tomcat-9/v${version}/bin/apache-tomcat-${version}.tar.gz"
+    local url="http:/archive.apache.org/dist/tomcat/tomcat-9/v${version}/bin/apache-tomcat-${version}.tar.gz"
 
     [[ "${OPTIONAL_CLI_INSTALL:-X}" != "X" && "$(which catalina)X" != "X" ]] && { exit 0; }
     if ! ( [ -f ${catalina_bin} ] && ${catalina_bin} version | grep "Server number: *${version}" > /dev/null); then
