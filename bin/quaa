@@ -32,6 +32,8 @@ PATH=${repo_root}/bin:${PATH}
 
 version=$(grep quaa ${repo_root}/.versions | cut -d= -f2)
 
+context_path="ROOT"
+
 pushd () {
     command pushd "$@" > /dev/null
 }
@@ -61,9 +63,16 @@ faketty() {
 
 validate_vars_file() {
     if [ ! -e $vars_file ]; then
+        if [[ "${context_path:-}" == "ROOT" ]]; then
             cat >> $vars_file <<-YAML
 route: "${hostname}:8080"
 YAML
+        else
+            cat >> $vars_file <<-YAML
+route: "${hostname}:8080/${context_path}"
+YAML
+        fi
+
         if [[ "${db_scheme:-}" == "postgresql" ]]; then
             cat >> $vars_file <<-YAML
 db_scheme: postgresql
@@ -188,7 +197,7 @@ up() {
     rm -rf $(catalina_base)/logs/uaa.log
     rm -rf $(catalina_base)/webapps
     mkdir -p $(catalina_base)/webapps
-    cp $(war_path) $(catalina_base)/webapps/ROOT.war
+    cp $(war_path) $(catalina_base)/webapps/$context_path.war
     cp ${repo_root}/manifests/tomcat/server.http-only.xml $(catalina_base)/conf/server.xml
 
     cat > ${uaa_config_path}/uaa.crt <<-CERT
@@ -429,6 +438,10 @@ _params() {
             --db-username)
                 shift
                 db_username=$1
+                ;;
+            -ctx|context-path)
+                shift
+                context_path=$1
                 ;;
             *)
                 params+=($1)
