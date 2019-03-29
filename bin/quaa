@@ -61,7 +61,7 @@ faketty() {
 
 validate_vars_file() {
     if [ ! -e $vars_file ]; then
-        cat >> $vars_file <<-YAML
+            cat >> $vars_file <<-YAML
 route: "${hostname}:8080"
 YAML
         if [[ "${db_scheme:-}" == "postgresql" ]]; then
@@ -305,6 +305,10 @@ uaa_int_args() {
 }
 
 uaa_int() {
+    mkdir -p ${state}
+    mkdir -p ${cache}
+    mkdir -p ${uaa_config_path}
+    validate_vars_file
     ${bosh_bin} int $(uaa_int_args) "$@"
 }
 
@@ -396,42 +400,54 @@ _ensure_java8_installed() {
     true
 }
 
+# Extract parameters and keep unknown parameters for subsequent operations
+_params() {
+    params=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help|help)
+                up_usage
+                exit 0
+                ;;
+            --postgresql)
+                db_scheme=postgresql
+                ;;
+            --in-memory)
+                db_scheme=memory
+                ;;
+            --memory)
+                db_scheme=memory
+                ;;
+            --db-port)
+                shift
+                db_port=$1
+                ;;
+            --db-name)
+                shift
+                db_name=$1
+                ;;
+            --db-username)
+                shift
+                db_username=$1
+                ;;
+            *)
+                params+=($1)
+                ;;
+        esac
+        shift
+    done
+}
+
 _ensure_bosh_cli_installed
 # IDEA: allow `uaa` subcommands to be passed thru
 # uaa -h | grep -v : | grep -v "\-\-" | grep "^  [a-z][a-z-]*  *[A-Z]" | awk '{print $1}'
 case "${1:-usage}" in
     up)
         shift
-        while [[ $# -gt 0 ]]; do
-            case "$1" in
-                -h|--help|help)
-                    up_usage
-                    exit 0
-                    ;;
-                --postgresql)
-                    db_scheme=postgresql
-                    ;;
-                --in-memory)
-                    db_scheme=memory
-                    ;;
-                --memory)
-                    db_scheme=memory
-                    ;;
-                --db-port)
-                    shift
-                    db_port=$1
-                    ;;
-                --db-name)
-                    shift
-                    db_name=$1
-                    ;;
-                --db-username)
-                    shift
-                    db_username=$1
-                    ;;
-            esac
-            shift
-        done
+        
+        _params "$@"
+        set -- ${params[*]}
+
         validate_vars_file
 
         up
@@ -468,6 +484,10 @@ case "${1:-usage}" in
 
     int)
         shift
+
+        _params "$@"
+        set -- ${params[*]}
+
         uaa_int "$@"
         ;;
 
