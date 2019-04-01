@@ -33,6 +33,7 @@ PATH=${repo_root}/bin:${PATH}
 version=$(grep quaa ${repo_root}/.versions | cut -d= -f2)
 
 context_path="ROOT"
+java_opts=""
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -193,6 +194,7 @@ up() {
     export JBP_CONFIG_SPRING_AUTO_RECONFIGURATION='{enabled: true}'
     export CLOUD_FOUNDRY_CONFIG_PATH=${uaa_config_path}
     export CATALINA_OPTS="-Djava.security.policy=unlimited -Xmx768m -XX:MaxMetaspaceSize=256m"
+    export JAVA_OPTS="${java_opts}"
 
     rm -rf $(catalina_base)/logs/uaa.log
     rm -rf $(catalina_base)/webapps
@@ -442,6 +444,10 @@ _params() {
             -ctx|context-path)
                 shift
                 context_path=$1
+                ;;
+            -opts|java-opts)
+                shift
+                java_opts=$1
                 ;;
             *)
                 params+=($1)
