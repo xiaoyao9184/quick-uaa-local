@@ -193,6 +193,8 @@ up() {
     export LOGIN_URL=$(public_url)
     export JBP_CONFIG_SPRING_AUTO_RECONFIGURATION='{enabled: true}'
     export CLOUD_FOUNDRY_CONFIG_PATH=${uaa_config_path}
+    # for newer version than 4.30.0
+    export CLOUDFOUNDRY_CONFIG_PATH=${uaa_config_path}
     export CATALINA_OPTS="-Djava.security.policy=unlimited -Xmx768m -XX:MaxMetaspaceSize=256m"
     export JAVA_OPTS="${java_opts}"
 
