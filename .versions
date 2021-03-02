@@ -1,5 +1,5 @@
 quaa=1.0.4
-bosh=5.2.2
+bosh=6.4.1
 uaa-cli=0.0.1
-uaa-server=4.20.0
-tomcat=9.0.12
+uaa-server=75.0.0
+tomcat=9.0.43
